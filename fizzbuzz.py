@@ -1,13 +1,17 @@
+numberToWordMap = {
+  3: 'Fizz',
+  5: 'Buzz',
+  7: 'DrugaDuma'
+}
+
 def fizzbuzz(length):
   for i in range(1, length + 1):
     output = ''
 
-    if(i % 3 == 0):
-      output += 'Fizz'
+    for key, value in numberToWordMap.items():
+      if(i % key == 0):
+        output += value
 
-    if(i % 5 == 0):
-      output += 'Buzz'
-
-    print(output if output else i)
+    print(output or i)
 
 fizzbuzz(100)
