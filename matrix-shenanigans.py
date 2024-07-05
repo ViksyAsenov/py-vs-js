@@ -35,6 +35,9 @@ def getAdjacentLinesIfOver5(matrix):
                 newRow += rowStep
                 newCol += colStep
 
+        # Save the start of the path so we can add it later to the processed set
+        start = (row, col)
+
         while (
             0 <= row < matrixLength
             and 0 <= col < matrixLength
@@ -47,18 +50,38 @@ def getAdjacentLinesIfOver5(matrix):
             col += colStep
 
         if len(output) >= 5:
-            for cell in output:
-                processed.add(cell)
+            # Calculate end of the path, we remove the previous steps because they have been incremented
+            # by the traversing algorithm
+            end = (row - rowStep, col - colStep)
+
+            processed.add((start, end))
+
             return tuple(output)
 
         return None
+
+    def isOverlap(row, col, processed):
+        for start, end in processed:
+            # Check if we are inside a horizontal line
+            if row == start[0] and row == end[1] and start[1] < col < end[1]:
+                return True
+
+            # Check if we are inside a vertical line
+            if start[0] < row < end[0] and col == start[1] and col == end[1]:
+                return True
+
+            # Check if we are inside a diagonal line
+            if start[0] < row < end[0] and start[1] < col < end[1]:
+                return True
+
+        return False
 
     output = []
     for row in range(matrixLength):
         for col in range(matrixLength):
             if matrix[row][col] != 0:
                 for (rowStep, colStep), processed in directionToProcessedMap.items():
-                    if (row, col) not in processed:
+                    if not isOverlap(row, col, processed):
                         line = getLineIfExists(row, col, rowStep, colStep, processed)
                         if line:
                             output.append(line)
@@ -194,6 +217,30 @@ class TestGetAdjacentLinesIfOver5(unittest.TestCase):
             ((1, 2), (2, 2), (3, 2), (4, 2), (5, 2), (6, 2)),
             ((2, 5), (3, 4), (4, 3), (5, 2), (6, 1)),
             ((7, 4), (7, 5), (7, 6), (7, 7), (7, 8)),
+        ]
+        self.assertEqual(result, expected)
+
+    def test_edgeCaseMatrix(self):
+        edgeCaseMatrix = [
+            [1, 1, 1, 1, 5, 6, 6, 6, 6],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ]
+
+        # Output for edgeCaseMatrix should be
+        # ((0,0),(0,1),(0,2),(0,3),(0,4))
+        # ((0,4),(0,5),(0,6),(0,7),(0,7))
+
+        result = getAdjacentLinesIfOver5(edgeCaseMatrix)
+        expected = [
+            ((0, 0), (0, 1), (0, 2), (0, 3), (0, 4)),
+            ((0, 4), (0, 5), (0, 6), (0, 7), (0, 8)),
         ]
         self.assertEqual(result, expected)
 
